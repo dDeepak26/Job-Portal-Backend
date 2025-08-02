@@ -45,9 +45,6 @@ const createJob = async (req, res) => {
     const newJobObj = new JobModel({
       ...req.body,
       employerId: isEmployer._id,
-      companyName: companyProfileData.companyName,
-      companyAbout: companyProfileData.companyAbout,
-      companyImage: companyProfileData.companyImage,
     });
 
     const jobData = await newJobObj.save();
@@ -100,10 +97,6 @@ const updateJob = async (req, res) => {
       jobDetailsDb._id,
       {
         ...req.body,
-        employerId: isEmployer._id,
-        companyName: jobDetailsDb.companyName,
-        companyAbout: jobDetailsDb.companyAbout,
-        companyImage: jobDetailsDb.companyImage,
       },
       { new: true }
     );
@@ -123,7 +116,10 @@ const updateJob = async (req, res) => {
 // get all jobs both applicant & employer
 const getAllJobs = async (req, res) => {
   try {
-    const jobsData = await JobModel.find();
+    const jobsData = await JobModel.find().populate(
+      "employerId",
+      "companyName companyImage"
+    );
     if (!jobsData) {
       return res.status(404).json({ errorMessage: "No jobs found" });
     }
@@ -144,7 +140,10 @@ const getJobsDetailsById = async (req, res) => {
         .status(404)
         .json({ errorMessage: "Job Id is required in params" });
     }
-    const jobsData = await JobModel.findById(id);
+    const jobsData = await JobModel.findById(id).populate(
+      "employerId",
+      "companyName companyAbout companyImage"
+    );
     if (!jobsData) {
       return res.status(404).json({ errorMessage: "No jobs found" });
     }
@@ -168,7 +167,9 @@ const getJobOfEmployer = async (req, res) => {
     }
     console.log("employer data", isEmployer);
 
-    const empJobData = await JobModel.find({ employerId: isEmployer._id });
+    const empJobData = await JobModel.find({
+      employerId: isEmployer._id,
+    }).populate("employerId");
     if (!empJobData) {
       return res
         .status(404)
@@ -183,39 +184,78 @@ const getJobOfEmployer = async (req, res) => {
   }
 };
 
-// applicant apply to job
-const applyToJobByApplicant = async (req, res) => {
+// save and unsave job api
+const saveJob = async (req, res) => {
   try {
-    // checking applicant
-    const isApplicant = req.user;
-    if (!isApplicant === "applicant") {
+    // verifying the applicant
+    const applicant = req.user;
+    if (!applicant.role === "applicant") {
       return res
         .status(401)
-        .json({ errorMessage: "only applicant can apply to job" });
+        .json({ errorMessage: "only applicant can save the job" });
     }
 
-    // checking if job is send
+    // verifying if job is is passed
     const jobId = req.params.id;
     if (!jobId) {
-      return res.status(404).json({ errorMessage: "Job id is required" });
+      return res
+        .status(404)
+        .json({ errorMessage: "Job Id is required in params" });
     }
 
-    // getting user details
-    const user = await ApplicantModel.findById(isApplicant._id);
+    // if job id is present then removing it else adding it
+    const isSaved = await ApplicantModel.findOne({
+      _id: applicant._id,
+      savedJobs: jobId,
+    });
+    console.log("saved document", isSaved);
 
-    // posting user detail to job
-    const updatedJobData = await JobModel.findByIdAndUpdate(
-      jobId,
-      {
-        appliedApplicants: user,
-      },
-      { new: true }
-    );
-
-    res.status(200).json(updatedJobData);
+    if (isSaved) {
+      // removing the saved
+      const removeSavedJobs = await ApplicantModel.findByIdAndUpdate(
+        applicant._id,
+        {
+          $pull: { savedJobs: jobId },
+        },
+        { new: true }
+      );
+      res.status(201).json({ message: "saved", removeSavedJobs });
+    } else {
+      // saving the job
+      const userSavedJobs = await ApplicantModel.findByIdAndUpdate(
+        applicant._id,
+        {
+          $push: { savedJobs: jobId },
+        },
+        { new: true }
+      );
+      res.status(201).json({ message: "saved", userSavedJobs });
+    }
   } catch (error) {
-    console.error("Error in applying to job ", error);
-    res.status().json({ errorMessage: "Error in applying to job" });
+    console.error("Error in saving jobs", error);
+    res.status(500).json({ errorMessage: "Error in saving jobs" });
+  }
+};
+
+// get list saved jobs ids
+const getSavedJobs = async (req, res) => {
+  try {
+    // verifying the applicant
+    const applicant = req.user;
+    if (!applicant.role === "applicant") {
+      return res
+        .status(401)
+        .json({ errorMessage: "only applicant can save the job" });
+    }
+
+    const savedJobsList = await ApplicantModel.findById(applicant._id)
+      .select("savedJobs")
+      .populate("savedJobs");
+
+    res.status(200).json(savedJobsList);
+  } catch (error) {
+    console.error("Error in getting saving jobs", error);
+    res.status(500).json({ errorMessage: "Error in getting saving jobs" });
   }
 };
 
@@ -225,5 +265,6 @@ module.exports = {
   getAllJobs,
   getJobsDetailsById,
   getJobOfEmployer,
-  applyToJobByApplicant,
+  saveJob,
+  getSavedJobs,
 };

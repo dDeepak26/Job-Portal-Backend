@@ -7,7 +7,8 @@ const {
   getAllJobs,
   getJobsDetailsById,
   getJobOfEmployer,
-  applyToJobByApplicant,
+  saveJob,
+  getSavedJobs,
 } = require("../controller/JobController");
 const jobValidator = require("../utils/jobValidator");
 
@@ -26,7 +27,10 @@ router.get("/:id", getJobsDetailsById);
 // get all jobs posted by employer
 router.get("/employer/jobs", AuthMiddleware, getJobOfEmployer);
 
-// apply to job only applicant
-router.put("/apply/:id", AuthMiddleware, applyToJobByApplicant);
+// save job
+router.post("/save/:id", AuthMiddleware, saveJob);
+
+// get saved job list
+router.get("/saved/jobs", AuthMiddleware, getSavedJobs);
 
 module.exports = router;

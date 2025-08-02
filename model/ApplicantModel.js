@@ -9,12 +9,12 @@ const ApplicantUserSchema = new mongoose.Schema(
     email: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     password: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     role: {
       type: String,
@@ -46,6 +46,7 @@ const ApplicantUserSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    savedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "jobs" }],
   },
   { timestamps: true }
 );

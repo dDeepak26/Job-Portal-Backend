@@ -5,67 +5,53 @@ const jobSchema = new mongoose.Schema(
   {
     employerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
-      require: true,
-    },
-    companyName: {
-      type: String,
-      trim: true,
-      require: true,
-    },
-    companyAbout: {
-      type: String,
-      trim: true,
-      require: true,
-    },
-    companyImage: {
-      type: String,
-      trim: true,
+      ref: "employers",
+      required: true,
     },
     jRole: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     jMode: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     jSalary: {
       type: Number,
       trim: true,
-      require: true,
+      required: true,
     },
     jLocation: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     jExperience: {
       type: Number,
       trim: true,
-      require: true,
+      required: true,
     },
     jQualification: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     jSkills: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     jResponsibility: {
       type: String,
       trim: true,
-      require: true,
+      required: true,
     },
     jNoOpening: {
       type: Number,
       trim: true,
-      require: true,
+      required: true,
     },
     appliedApplicants: [ApplicantUserSchema],
   },

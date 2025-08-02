@@ -6,6 +6,7 @@ const UserRoutes = require("./routes/UserRoutes");
 const CompanyProfileRoutes = require("./routes/CompanyProfileRoutes");
 const ApplicantProfileRoutes = require("./routes/ApplicantProfileRoutes");
 const JobRoutes = require("./routes/JobRoutes");
+const ApplicationsRoutes = require("./routes/ApplicationsRoutes");
 
 // env config
 const dotenv = require("dotenv");
@@ -33,6 +34,7 @@ app.use("/api/auth", UserRoutes);
 app.use("/api/company-profile", CompanyProfileRoutes);
 app.use("/api/applicant-profile", ApplicantProfileRoutes);
 app.use("/api/job", JobRoutes);
+app.use("/api/application", ApplicationsRoutes);
 
 // listening
 app.listen(process.env.PORT || 8080, () => {

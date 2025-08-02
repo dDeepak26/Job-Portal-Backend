@@ -2,7 +2,10 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-const multerUploaderMiddleware = (folderName = "uploads") => {
+const multerUploaderMiddleware = (
+  folderName = "unknown",
+  uploadType = "image"
+) => {
   // storage config
   const storage = multer.diskStorage({
     // file destination
@@ -19,7 +22,7 @@ const multerUploaderMiddleware = (folderName = "uploads") => {
   });
 
   // file filter to only store the images
-  const fileFilter = (req, file, cb) => {
+  const fileFilterImage = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png/;
     const ext = path.extname(file.originalname).toLowerCase();
     const mime = file.mimetype;
@@ -31,10 +34,28 @@ const multerUploaderMiddleware = (folderName = "uploads") => {
     }
   };
 
+  // file filter to store pdf
+  const fileFilterPdf = (req, file, cb) => {
+    const allowedTypes = /pdf|doc|docx/;
+    const allowedMimes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype;
+
+    if (allowedTypes.test(ext) && allowedMimes.includes(mime)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF and Word files are allowed"));
+    }
+  };
+
   return multer({
     storage,
-    fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: uploadType === "image" ? fileFilterImage : fileFilterPdf,
+    limits: uploadType === "image" ? { fileSize: 5 * 1024 * 1024 } : undefined,
   });
 };
 
