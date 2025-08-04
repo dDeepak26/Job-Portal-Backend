@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 const { ApplicantModel } = require("../model/ApplicantModel");
 const { EmployerModel } = require("../model/EmployerModel");
 
-// to create a new user or register
+// to create a new user or register employer as well as applicant
 const registerUser = async (req, res) => {
   try {
     console.log("register api called with initials values ", req.body);

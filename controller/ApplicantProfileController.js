@@ -5,7 +5,7 @@ const { ApplicantModel } = require("../model/ApplicantModel");
 const createUpdateApplicantProfile = async (req, res) => {
   try {
     const isApplicant = req.user;
-    if (!isApplicant.role === "applicant") {
+    if (isApplicant.role !== "applicant") {
       return res
         .status(401)
         .json({ errorMessage: "Only Applicant can create its profile" });
@@ -70,7 +70,7 @@ const createUpdateApplicantProfile = async (req, res) => {
 const getApplicantProfile = async (req, res) => {
   try {
     const isApplicant = req.user;
-    if (!isApplicant === "applicant") {
+    if (isApplicant.role !== "applicant") {
       return res
         .status(401)
         .json({ message: "only applicant can get their profile" });
@@ -78,11 +78,12 @@ const getApplicantProfile = async (req, res) => {
 
     const profileData = await ApplicantModel.findById(isApplicant._id);
     if (
-      !profileData.aAbout &&
-      !profileData.aQualifications &&
-      !profileData.aExperience &&
-      !profileData.aLocation &&
-      !profileData.aSkills &&
+      !profileData ||
+      !profileData.aAbout ||
+      !profileData.aQualifications ||
+      !profileData.aExperience ||
+      !profileData.aLocation ||
+      !profileData.aSkills ||
       !profileData.aImage
     ) {
       return res.status(409).json({ message: "No profile found" });

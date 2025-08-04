@@ -1,7 +1,3 @@
-// user -> employer
-// !profile -> create
-// Read Update
-
 const { validationResult } = require("express-validator");
 const { EmployerModel } = require("../model/EmployerModel");
 
@@ -10,7 +6,7 @@ const getCompanyProfile = async (req, res) => {
   try {
     // checking if user is employer || !
     const isEmployer = req.user;
-    if (!isEmployer.role === "employer") {
+    if (isEmployer.role !== "employer") {
       return res
         .status(401)
         .json({ errorMessage: "Only Employer can create company profile" });
@@ -19,8 +15,9 @@ const getCompanyProfile = async (req, res) => {
 
     const companyProfileData = await EmployerModel.findById(isEmployer._id);
     if (
-      !companyProfileData.companyName &&
-      !companyProfileData.companyAbout &&
+      !companyProfileData ||
+      !companyProfileData.companyName ||
+      !companyProfileData.companyAbout ||
       !companyProfileData.companyImage
     ) {
       return res.status(404).json({ errorMessage: "No company profile found" });
@@ -40,7 +37,7 @@ const updateCompanyProfile = async (req, res) => {
   try {
     // checking if user is employer || !
     const isEmployer = req.user;
-    if (!isEmployer.role === "employer") {
+    if (isEmployer.role !== "employer") {
       return res
         .status(401)
         .json({ errorMessage: "Only Employer can create company profile" });

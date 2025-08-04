@@ -8,7 +8,7 @@ const createJob = async (req, res) => {
   try {
     // checking if user is employer || !
     const isEmployer = req.user;
-    if (!isEmployer.role === "employer") {
+    if (isEmployer.role !== "employer") {
       return res
         .status(401)
         .json({ errorMessage: "Only Employer can create job" });
@@ -18,8 +18,9 @@ const createJob = async (req, res) => {
     // checking if employer has created the company profile || !
     const companyProfileData = await EmployerModel.findById(isEmployer._id);
     if (
-      !companyProfileData.companyName &&
-      !companyProfileData.companyAbout &&
+      !companyProfileData ||
+      !companyProfileData.companyName ||
+      !companyProfileData.companyAbout ||
       !companyProfileData.companyImage
     ) {
       return res
@@ -63,7 +64,7 @@ const updateJob = async (req, res) => {
   try {
     // checking if user is employer
     const isEmployer = req.user;
-    if (!isEmployer === "employer") {
+    if (isEmployer.role !== "employer") {
       return res
         .status(401)
         .json({ errorMessage: "Only Employer can update job details" });
@@ -160,7 +161,7 @@ const getJobOfEmployer = async (req, res) => {
   try {
     // checking is employer
     const isEmployer = req.user;
-    if (!isEmployer.role === "employer") {
+    if (isEmployer.role !== "employer") {
       return res
         .status(401)
         .json({ errorMessage: "Only employer can get its posted job data" });
@@ -189,7 +190,7 @@ const saveJob = async (req, res) => {
   try {
     // verifying the applicant
     const applicant = req.user;
-    if (!applicant.role === "applicant") {
+    if (applicant.role !== "applicant") {
       return res
         .status(401)
         .json({ errorMessage: "only applicant can save the job" });
@@ -242,7 +243,7 @@ const getSavedJobs = async (req, res) => {
   try {
     // verifying the applicant
     const applicant = req.user;
-    if (!applicant.role === "applicant") {
+    if (applicant.role !== "applicant") {
       return res
         .status(401)
         .json({ errorMessage: "only applicant can save the job" });
@@ -250,7 +251,13 @@ const getSavedJobs = async (req, res) => {
 
     const savedJobsList = await ApplicantModel.findById(applicant._id)
       .select("savedJobs")
-      .populate("savedJobs");
+      .populate({
+        path: "savedJobs",
+        populate: {
+          path: "employerId",
+          model: "employers",
+        },
+      });
 
     res.status(200).json(savedJobsList);
   } catch (error) {

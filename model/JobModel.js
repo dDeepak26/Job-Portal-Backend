@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { ApplicantUserSchema } = require("./ApplicantModel");
 
 const jobSchema = new mongoose.Schema(
   {
@@ -53,7 +52,6 @@ const jobSchema = new mongoose.Schema(
       trim: true,
       required: true,
     },
-    appliedApplicants: [ApplicantUserSchema],
   },
   { timestamps: true }
 );
