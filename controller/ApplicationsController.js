@@ -1,5 +1,7 @@
 const { ApplicationsModel } = require("../model/ApplicationsModel");
+const { ApplicantModel } = require("../model/ApplicantModel");
 const { JobModel } = require("../model/JobModel");
+const mailService = require("../service/mailService");
 
 // apply to only by applicant
 const applyToJob = async (req, res) => {
@@ -32,6 +34,22 @@ const applyToJob = async (req, res) => {
     console.log(applicantsData);
     if (applicantsData) {
       return res.status(409).json({ errorMessage: "Already applied to job" });
+    }
+
+    // checking if applicant had created his profile
+    const applicantProfile = await ApplicantModel.findById(applicant._id);
+    if (
+      !applicantProfile ||
+      !applicantProfile.aAbout ||
+      !applicantProfile.aExperience ||
+      !applicantProfile.aImage ||
+      !applicantProfile.aLocation ||
+      !applicantProfile.aQualifications ||
+      !applicantProfile.aSkills
+    ) {
+      return res
+        .status(404)
+        .json({ errorMessage: "first create profile to apply to job" });
     }
 
     // file validation
@@ -103,7 +121,7 @@ const getJobStatus = async (req, res) => {
   }
 };
 
-// change job status by employer to either accepted or rejected
+// change job status by employer to either rejected or accepted  if accept then send mail for interview by sending the date time, and some necessary info
 const changeJobStatus = async (req, res) => {
   try {
     // checking if user is employer
@@ -122,7 +140,15 @@ const changeJobStatus = async (req, res) => {
         .json({ errorMessage: "applications id is required" });
     }
 
-    const { status } = req.body;
+    const { applicantId, status, dateTime, location, companyName, jRole } =
+      req.body;
+
+    const applicant = await ApplicantModel.findById(applicantId);
+    console.log("applicant data", applicant);
+
+    if (status === "Accepted") {
+      mailService(applicant.fullName, dateTime, location, companyName, jRole);
+    }
 
     // changing
     const updDoc = await ApplicationsModel.findByIdAndUpdate(

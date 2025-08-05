@@ -53,5 +53,4 @@ const ApplicantUserSchema = new mongoose.Schema(
 
 module.exports = {
   ApplicantModel: mongoose.model("applicants", ApplicantUserSchema),
-  ApplicantUserSchema,
 };

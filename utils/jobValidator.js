@@ -25,7 +25,7 @@ const jobValidator = [
   body("jSalary")
     .notEmpty()
     .withMessage("Salary is required")
-    .isFloat({ min: 1.0, max: 10000.0 })
+    .isFloat({ min: 1.0, max: 100.0 })
     .withMessage("Salary must be between 1,000 and 10000"),
 
   body("jLocation")
