@@ -38,6 +38,8 @@ const applyToJob = async (req, res) => {
 
     // checking if applicant had created his profile
     const applicantProfile = await ApplicantModel.findById(applicant._id);
+    console.log("db applicant data", applicantProfile);
+
     if (
       !applicantProfile ||
       !applicantProfile.aAbout ||
@@ -53,14 +55,17 @@ const applyToJob = async (req, res) => {
     }
 
     // file validation
-    console.log("resume file info ", req.file);
-    if (!req.file) {
-      return res.status(400).json({ errorMessage: "no resume file uploaded" });
+    if (!req.file && !applicantProfile.resumeUrl) {
+      return res.status(500).json({
+        errorMessage: "no resume find either in profile or in applied",
+      });
     }
-
-    // pdf file path config
-    const baseUrl = req.protocol + "://" + req.get("host"); // e.g., http://localhost:8080
-    const resumeUrl = `${baseUrl}/uploads/Resumes/${req.file.filename}`;
+    if (req.file) {
+      // pdf file path config
+      const baseUrl = req.protocol + "://" + req.get("host"); // e.g., http://localhost:8080
+      var resumeUrlUploaded = `${baseUrl}/uploads/Resumes/${req.file.filename}`;
+    }
+    console.log("resume file info ", req.file);
 
     // creating new document
     const applicantDoc = new ApplicationsModel({
@@ -68,7 +73,7 @@ const applyToJob = async (req, res) => {
       jobId: jobData._id,
       employerId: jobData.employerId,
       status: "Applied",
-      resumeUrl: resumeUrl,
+      resumeUrl: resumeUrlUploaded || applicantProfile.resumeUrl,
     });
 
     // saving

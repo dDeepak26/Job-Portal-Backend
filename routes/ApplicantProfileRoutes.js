@@ -6,9 +6,11 @@ const AuthMiddleware = require("../middleware/AuthMiddleware");
 const {
   createUpdateApplicantProfile,
   getApplicantProfile,
+  saveResume,
 } = require("../controller/ApplicantProfileController");
 
 const uploadApplicantProfile = multerUploaderMiddleware("ApplicantProfile");
+const uploadApplicantResume = multerUploaderMiddleware("Resumes", "resume");
 
 // get profile info
 router.get("/", AuthMiddleware, getApplicantProfile);
@@ -20,6 +22,14 @@ router.put(
   ApplicantProfileValidator,
   AuthMiddleware,
   createUpdateApplicantProfile
+);
+
+// resume update
+router.put(
+  "/resume",
+  AuthMiddleware,
+  uploadApplicantResume.single("file"),
+  saveResume
 );
 
 module.exports = router;
