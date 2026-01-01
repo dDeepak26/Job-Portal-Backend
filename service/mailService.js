@@ -6,19 +6,19 @@ async function mailService(
   location,
   companyName,
   jRole,
-  recipientMail = "work.deepakdurgam@gmail.com"
+  recipientMail = process.env.RECIPIENT_MAIL
 ) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "ddaniel264620@gmail.com",
+      user: process.env.EMAIL_USER,
       pass: process.env.GOOGLE_APP_PASSWORD,
     },
   });
 
   //   mail info
   const info = await transporter.sendMail({
-    from: '"D Daniel" <ddaniel264620@gmail.com>',
+    from: `"Job Portal" <${process.env.EMAIL_USER}>`,
     to: `${recipientMail}`,
     subject: `Interview Invitation – ${companyName} ${jRole}`,
     text: `
