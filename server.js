@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger.config");
+require("./config/swagger.schemas"); // Import schema definitions
 const MongoDbConnect = require("./config/MongoDbConnect");
 const UserRoutes = require("./routes/UserRoutes");
 const CompanyProfileRoutes = require("./routes/CompanyProfileRoutes");
@@ -24,9 +27,22 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // connecting to mongodb
 MongoDbConnect();
 
+// Swagger API documentation
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Job Portal API Documentation",
+  })
+);
+
 // basic test route
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Hello" });
+  res.status(200).json({
+    message: "Job Portal API is running",
+    documentation: "http://localhost:8080/api-docs",
+  });
 });
 
 // all routes
